@@ -3,15 +3,8 @@
     <editor-bookmarks xmlns="http://www.netbeans.org/ns/editor-bookmarks/2" lastBookmarkId="0"/>
     <open-files xmlns="http://www.netbeans.org/ns/projectui-open-files/2">
         <group>
-            <file>file:/C:/Users/siste/Work/FP/Programacion/NetBeansProjects/FileRenamer/src/filerenamer/ui/MainFrame.java</file>
-            <file>file:/C:/Users/siste/Work/FP/Programacion/NetBeansProjects/FileRenamer/src/filerenamer/Main.java</file>
-            <file>file:/C:/Users/siste/Work/FP/Programacion/NetBeansProjects/FileRenamer/src/filerenamer/logic/PrefixStrategy.java</file>
-            <file>file:/C:/Users/siste/Work/FP/Programacion/NetBeansProjects/FileRenamer/src/filerenamer/logic/SuffixStrategy.java</file>
-            <file>file:/C:/Users/siste/Work/FP/Programacion/NetBeansProjects/FileRenamer/src/filerenamer/logic/WordNumberStrategy.java</file>
-            <file>file:/C:/Users/siste/Work/FP/Programacion/NetBeansProjects/FileRenamer/src/filerenamer/logic/RemoveSubstringStrategy.java</file>
-            <file>file:/C:/Users/siste/Work/FP/Programacion/NetBeansProjects/FileRenamer/src/filerenamer/logic/RemoveCharsStrategy.java</file>
-            <file>file:/C:/Users/siste/Work/FP/Programacion/NetBeansProjects/FileRenamer/src/filerenamer/logic/NumberingStrategy.java</file>
-            <file>file:/C:/Users/siste/Work/FP/Programacion/NetBeansProjects/FileRenamer/src/filerenamer/logic/NaturalOrderComparator.java</file>
+            <file>file:/C:/Users/oleksandr.dan/Documents/NetBeansProjects/FileRenamer/src/filerenamer/ui/MainFrame.java</file>
+            <file>file:/C:/Users/oleksandr.dan/Documents/NetBeansProjects/FileRenamer/src/filerenamer/Main.java</file>
         </group>
     </open-files>
 </project-private>
