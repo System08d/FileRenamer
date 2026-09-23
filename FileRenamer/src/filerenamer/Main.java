@@ -27,6 +27,7 @@ public class Main {
             ex.printStackTrace();
         }
 
+        
         java.awt.EventQueue.invokeLater(() -> new MainFrame().setVisible(true));
     }
 }
