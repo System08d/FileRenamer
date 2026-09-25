@@ -35,13 +35,21 @@ public class MainFrame extends javax.swing.JFrame {
     private File selectedSourceFolder;
     private File selectedDestFolder;
     private static final String APP_NAME = "File Renamer";
-    private static final String APP_VERSION = "1.8";
+    private static final String APP_VERSION = "1.9";
     /**
      * Creates new form MainFrame
      */
     public MainFrame() {
     initComponents();
     setTitle(APP_NAME + " v" + APP_VERSION);
+    
+    java.net.URL iconURL = getClass().getResource("/filerenamer/ui/Logo.png");
+    if (iconURL != null) {
+        setIconImages(loadIconImages());
+    } else {
+        logger.log(java.util.logging.Level.WARNING, "Логотип не найден: /filerenamer/ui/Logo.png");
+    }
+    
     cmbPattern.removeAllItems();
     cmbPattern.addItem("Случайное число");
     cmbPattern.addItem("Нумерация");
@@ -468,6 +476,23 @@ case "Удаление N символов": {
         default:
             return null;
     }
+}
+    
+    // This method adds logo with diferent sizes (16, 24, 32, 48, 64, 128, 256) px each
+    private java.util.List<java.awt.Image> loadIconImages() {
+    int[] sizes = {16, 24, 32, 48, 64, 128, 256};
+    java.util.List<java.awt.Image> icons = new java.util.ArrayList<>();
+
+    for (int size : sizes) {
+        java.net.URL url = getClass().getResource("/filerenamer/ui/Logo-" + size + ".png");
+        if (url != null) {
+            icons.add(new javax.swing.ImageIcon(url).getImage());
+        } else {
+            logger.log(java.util.logging.Level.WARNING, "Не найдена иконка размера " + size);
+        }
+    }
+
+    return icons;
 }
     
     /**
