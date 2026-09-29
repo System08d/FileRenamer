@@ -4,6 +4,8 @@
  */
 package filerenamer.ui;
 
+//All imports
+
 import javax.swing.JFileChooser;
 import javax.swing.DefaultListModel;
 import java.io.File;
@@ -23,12 +25,22 @@ import filerenamer.logic.NaturalOrderComparator;
 import filerenamer.logic.NumberingFromStrategy;
 import java.util.Arrays;
 import java.util.Comparator;
+import filerenamer.i18n.I18n;
+import filerenamer.i18n.RenameMode;
+import filerenamer.i18n.RemoveSide;
+
 /**
  *
  * @author siste
+ * @author oleksandr.dan
+ * 
  */
+
 public class MainFrame extends javax.swing.JFrame {
     
+    private boolean initializing = true;
+    
+    //Loggs
     private static final java.util.logging.Logger logger = java.util.logging.Logger.getLogger(MainFrame.class.getName());
 
     
@@ -36,18 +48,25 @@ public class MainFrame extends javax.swing.JFrame {
     private File selectedDestFolder;
     private static final String APP_NAME = "File Renamer";
     private static final String APP_VERSION = "1.9";
+    
     /**
      * Creates new form MainFrame
      */
+    
     public MainFrame() {
     initComponents();
-    setTitle(APP_NAME + " v" + APP_VERSION);
-    
+
+    setTitle(APP_NAME + " V" + APP_VERSION);
+
     java.net.URL iconURL = getClass().getResource("/filerenamer/ui/Logo.png");
+
     if (iconURL != null) {
         setIconImages(loadIconImages());
     } else {
-        logger.log(java.util.logging.Level.WARNING, "Логотип не найден: /filerenamer/ui/Logo.png");
+        logger.log(
+                java.util.logging.Level.WARNING,
+                "Logo not found: /filerenamer/ui/Logo.png"
+        );
     }
     
     cmbPattern.removeAllItems();
@@ -64,8 +83,23 @@ public class MainFrame extends javax.swing.JFrame {
     cmbSide.addItem("С начала");
     cmbSide.addItem("С конца");
     
-    new FolderDropHandler(pnlDropSource, this::handleSourceFolderSelected);
-    new FolderDropHandler(pnlDropDest, this::handleDestFolderSelected);
+    setupLanguageCombo();
+    setupPatternCombo();
+    setupSideCombo();
+
+    updateTexts();
+
+    new FolderDropHandler(
+            pnlDropSource,
+            this::handleSourceFolderSelected
+    );
+
+    new FolderDropHandler(
+            pnlDropDest,
+            this::handleDestFolderSelected
+    );
+
+    initializing = false;
 }
 
     /**
@@ -97,6 +131,8 @@ public class MainFrame extends javax.swing.JFrame {
         lblDropSourceHint = new javax.swing.JLabel();
         pnlDropDest = new javax.swing.JPanel();
         lblDropDestHint = new javax.swing.JLabel();
+        lblLanguage = new javax.swing.JLabel();
+        cmbLanguage = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(217, 74, 195));
@@ -180,16 +216,16 @@ public class MainFrame extends javax.swing.JFrame {
                 .addContainerGap(17, Short.MAX_VALUE))
         );
 
+        lblLanguage.setText("jLabel3");
+
+        cmbLanguage.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(btnRename, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(107, 107, 107))
                     .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
@@ -203,25 +239,34 @@ public class MainFrame extends javax.swing.JFrame {
                             .addGroup(layout.createSequentialGroup()
                                 .addGap(127, 127, 127)
                                 .addComponent(txtInputText, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGap(0, 636, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 78, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lblLanguage))
+                            .addComponent(cmbLanguage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(lblDestPath, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(lblInputText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(lblFolderPath, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(47, 47, 47)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(lblDestPath, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(lblInputText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(lblFolderPath, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(47, 47, 47)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(btnChooseFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
-                                            .addComponent(pnlDropSource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 402, javax.swing.GroupLayout.PREFERRED_SIZE)))))
+                                    .addComponent(btnChooseFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
+                                    .addComponent(pnlDropSource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 402, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(btnRename, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(107, 107, 107))
+                            .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
             .addGroup(layout.createSequentialGroup()
                 .addGap(127, 127, 127)
@@ -234,39 +279,46 @@ public class MainFrame extends javax.swing.JFrame {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(pnlDropSource, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(lblLanguage)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnChooseFolder)
+                        .addComponent(cmbLanguage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(pnlDropSource, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(btnChooseFolder)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(lblFolderPath)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(pnlDropDest, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblFolderPath)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(pnlDropDest, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(btnChooseDest)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblDestPath)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(cmbPattern, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jLabel1)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtInputText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(lblInputText)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(txtCharCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(btnRename)
-                    .addComponent(cmbSide, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lblStatus)
-                    .addComponent(jLabel2))
-                .addGap(26, 26, 26))
+                        .addComponent(btnChooseDest)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblDestPath)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(cmbPattern, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel1)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtInputText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblInputText)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(txtCharCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(btnRename)
+                            .addComponent(cmbSide, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(18, 18, 18)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblStatus)
+                            .addComponent(jLabel2))
+                        .addGap(26, 26, 26))))
         );
 
         pack();
@@ -286,7 +338,9 @@ public class MainFrame extends javax.swing.JFrame {
     private void btnChooseFolderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChooseFolderActionPerformed
     JFileChooser fileChooser = new JFileChooser();
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    fileChooser.setDialogTitle("Выберите исходную папку");
+    fileChooser.setDialogTitle(
+        I18n.get("dialog.chooseSource"));
+    //fileChooser.setDialogTitle("Выберите исходную папку");
 
     int result = fileChooser.showOpenDialog(this);
 
@@ -300,8 +354,14 @@ public class MainFrame extends javax.swing.JFrame {
         lblStatus.setText("Сначала выберите исходную папку");
         return;
     }
+    //    if (selectedDestFolder == null) {
+    //        lblStatus.setText("Сначала выберите папку для копий");
+    //        return;
+    //    }
     if (selectedDestFolder == null) {
-        lblStatus.setText("Сначала выберите папку для копий");
+        lblStatus.setText(
+            I18n.get("status.needDest")
+        );
         return;
     }
 
@@ -361,10 +421,33 @@ sortFilesNaturally(files);
 
         index++;
     }
+    //new
+    if (errorCount > 0) {
 
-    lblStatus.setText("Скопировано: " + copiedCount
-            + (errorCount > 0 ? ", ошибок: " + errorCount : "")
-            + " → папка " + outputFolder.getName());
+    lblStatus.setText(
+            I18n.get(
+                    "status.copiedWithErrors",
+                    copiedCount,
+                    errorCount,
+                    outputFolder.getName()
+            )
+    );
+
+} else {
+
+    lblStatus.setText(
+            I18n.get(
+                    "status.copied",
+                    copiedCount,
+                    outputFolder.getName()
+            )
+    );
+}
+
+    //old
+//    lblStatus.setText("Скопировано: " + copiedCount
+//            + (errorCount > 0 ? ", ошибок: " + errorCount : "")
+//            + " → папка " + outputFolder.getName());
     }//GEN-LAST:event_btnRenameActionPerformed
 
     private void btnChooseDestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChooseDestActionPerformed
@@ -383,15 +466,20 @@ sortFilesNaturally(files);
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbPatternActionPerformed
 
-    
+    //new
     private void loadFilesIntoList(File folder) {
-    DefaultListModel<String> model = new DefaultListModel<>();
+
+    DefaultListModel<String> model =
+            new DefaultListModel<>();
 
     File[] files = folder.listFiles();
 
     if (files != null) {
+
         sortFilesNaturally(files);
+
         for (File f : files) {
+
             if (f.isFile()) {
                 model.addElement(f.getName());
             }
@@ -399,14 +487,159 @@ sortFilesNaturally(files);
     }
 
     listFiles.setModel(model);
-    lblStatus.setText("Найдено файлов: " + model.getSize());
+
+    lblStatus.setText(
+            I18n.get(
+                    "status.found",
+                    model.getSize()
+            )
+    );
 }
+    
+    //old
+//    private void loadFilesIntoList(File folder) {
+//    DefaultListModel<String> model = new DefaultListModel<>();
+//
+//    File[] files = folder.listFiles();
+//
+//    if (files != null) {
+//        sortFilesNaturally(files);
+//        for (File f : files) {
+//            if (f.isFile()) {
+//                model.addElement(f.getName());
+//            }
+//        }
+//    }
+//
+//    listFiles.setModel(model);
+//    lblStatus.setText("Найдено файлов: " + model.getSize());
+//}
     
     private void sortFilesNaturally(File[] files) {
     Arrays.sort(files, Comparator.comparing(File::getName, new NaturalOrderComparator()));
 }
     
+    //new
     private RenameStrategy createStrategy() {
+
+    int selectedIndex = cmbPattern.getSelectedIndex();
+
+    if (selectedIndex < 0 ||
+            selectedIndex >= RenameMode.values().length) {
+
+        return null;
+    }
+
+    RenameMode mode =
+            RenameMode.values()[selectedIndex];
+
+    switch (mode) {
+
+        case RANDOM:
+            return new RandomNumberStrategy();
+
+        case NUMBERING:
+            return new NumberingStrategy();
+
+        case NUMBERING_FROM: {
+
+            String text = txtInputText.getText();
+
+            if (text == null || text.isBlank()) {
+                return null;
+            }
+
+            try {
+                int start = Integer.parseInt(text.trim());
+
+                return new NumberingFromStrategy(start);
+
+            } catch (NumberFormatException ex) {
+                return null;
+            }
+        }
+
+        case PREFIX: {
+
+            String text = txtInputText.getText();
+
+            if (text == null || text.isBlank()) {
+                return null;
+            }
+
+            return new PrefixStrategy(text);
+        }
+
+        case SUFFIX: {
+
+            String text = txtInputText.getText();
+
+            if (text == null || text.isBlank()) {
+                return null;
+            }
+
+            return new SuffixStrategy(text);
+        }
+
+        case WORD_NUMBER: {
+
+            String text = txtInputText.getText();
+
+            if (text == null || text.isBlank()) {
+                return null;
+            }
+
+            return new WordNumberStrategy(text);
+        }
+
+        case REMOVE_SUBSTRING: {
+
+            String text = txtInputText.getText();
+
+            if (text == null || text.isBlank()) {
+                return null;
+            }
+
+            return new RemoveSubstringStrategy(text);
+        }
+
+        case REMOVE_CHARS: {
+
+            int count;
+
+            try {
+                count = Integer.parseInt(
+                        txtCharCount.getText().trim()
+                );
+
+            } catch (NumberFormatException ex) {
+                return null;
+            }
+
+            if (count < 0) {
+                return null;
+            }
+
+            RemoveSide side =
+                    cmbSide.getSelectedIndex() == 0
+                            ? RemoveSide.START
+                            : RemoveSide.END;
+
+            return new RemoveCharsStrategy(
+                    count,
+                    side == RemoveSide.START
+                            ? RemoveCharsStrategy.Side.START
+                            : RemoveCharsStrategy.Side.END
+            );
+        }
+
+        default:
+            return null;
+    }
+}
+    
+    //old
+   /** private RenameStrategy createStrategy() {
     String selected = (String) cmbPattern.getSelectedItem();
     if (selected == null) {
         return null;
@@ -477,6 +710,9 @@ case "Удаление N символов": {
             return null;
     }
 }
+  */
+    
+    
     
     // This method adds logo with diferent sizes (16, 24, 32, 48, 64, 128, 256) px each
     private java.util.List<java.awt.Image> loadIconImages() {
@@ -495,6 +731,135 @@ case "Удаление N символов": {
     return icons;
 }
     
+    // Метод для выбора языка
+        private void setupLanguageCombo() {
+
+        cmbLanguage.removeAllItems();
+
+        cmbLanguage.addItem("Русский");
+        cmbLanguage.addItem("English");
+        cmbLanguage.addItem("Español");
+
+        cmbLanguage.setSelectedIndex(0);
+    }
+        
+             //Обработчик языка
+                private void cmbLanguageActionPerformed(java.awt.event.ActionEvent evt) {
+
+            if (initializing) {
+                return;
+            }
+
+            switch (cmbLanguage.getSelectedIndex()) {
+
+                case 0:
+                    I18n.setLanguage("ru");
+                    break;
+
+                case 1:
+                    I18n.setLanguage("en");
+                    break;
+
+                case 2:
+                    I18n.setLanguage("es");
+                    break;
+
+                default:
+                    return;
+            }
+
+            updateTexts();
+        }
+                
+                
+                //new metod
+        private void setupPatternCombo() {
+
+    cmbPattern.removeAllItems();
+
+    for (RenameMode mode : RenameMode.values()) {
+        cmbPattern.addItem(I18n.get(mode.getKey()));
+    }
+
+    cmbPattern.setSelectedIndex(0);
+}
+        
+        //new mhetod
+        private void updateTexts() {
+
+    setTitle(APP_NAME + " V" + APP_VERSION);
+
+    lblLanguage.setText(I18n.get("label.language"));
+
+    btnChooseFolder.setText(
+            I18n.get("button.chooseSource")
+    );
+
+    btnChooseDest.setText(
+            I18n.get("button.chooseDest")
+    );
+
+    btnRename.setText(
+            I18n.get("button.rename")
+    );
+
+    lblFolderPath.setText(
+            selectedSourceFolder == null
+                    ? I18n.get("label.sourceNotSelected")
+                    : selectedSourceFolder.getAbsolutePath()
+    );
+
+    lblDestPath.setText(
+            selectedDestFolder == null
+                    ? I18n.get("label.destNotSelected")
+                    : selectedDestFolder.getAbsolutePath()
+    );
+
+    jLabel1.setText(
+            I18n.get("label.pattern")
+    );
+
+    lblInputText.setText(
+            I18n.get("label.inputText")
+    );
+
+    jLabel2.setText(
+            I18n.get("label.side")
+    );
+
+    lblDropSourceHint.setText(
+            I18n.get("drop.hint")
+    );
+
+    lblDropDestHint.setText(
+            I18n.get("drop.hint")
+    );
+
+    setupPatternCombo();
+    setupSideCombo();
+}
+        
+        // OTHER MHETOD
+        private void setupSideCombo() {
+
+    int selectedIndex = cmbSide.getSelectedIndex();
+
+    cmbSide.removeAllItems();
+
+    for (RemoveSide side : RemoveSide.values()) {
+        cmbSide.addItem(I18n.get(side.getKey()));
+    }
+
+    if (selectedIndex >= 0 &&
+            selectedIndex < cmbSide.getItemCount()) {
+
+        cmbSide.setSelectedIndex(selectedIndex);
+
+    } else {
+        cmbSide.setSelectedIndex(0);
+    }
+}
+    
     /**
      * @param args the command line arguments
      */
@@ -503,6 +868,7 @@ case "Удаление N символов": {
     private javax.swing.JButton btnChooseDest;
     private javax.swing.JButton btnChooseFolder;
     private javax.swing.JButton btnRename;
+    private javax.swing.JComboBox<String> cmbLanguage;
     private javax.swing.JComboBox<String> cmbPattern;
     private javax.swing.JComboBox<String> cmbSide;
     private javax.swing.JLabel jLabel1;
@@ -513,6 +879,7 @@ case "Удаление N символов": {
     private javax.swing.JLabel lblDropSourceHint;
     private javax.swing.JLabel lblFolderPath;
     private javax.swing.JLabel lblInputText;
+    private javax.swing.JLabel lblLanguage;
     private javax.swing.JLabel lblStatus;
     private javax.swing.JList<String> listFiles;
     private javax.swing.JPanel pnlDropDest;
