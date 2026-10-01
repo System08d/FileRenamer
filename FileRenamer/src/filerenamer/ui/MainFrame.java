@@ -69,20 +69,6 @@ public class MainFrame extends javax.swing.JFrame {
         );
     }
     
-    cmbPattern.removeAllItems();
-    cmbPattern.addItem("Случайное число");
-    cmbPattern.addItem("Нумерация");
-    cmbPattern.addItem("Нумерация с числа");
-    cmbPattern.addItem("Префикс");
-    cmbPattern.addItem("Суффикс");
-    cmbPattern.addItem("Слово + номер");
-    cmbPattern.addItem("Удаление подстроки");
-    cmbPattern.addItem("Удаление N символов");
-
-    cmbSide.removeAllItems();
-    cmbSide.addItem("С начала");
-    cmbSide.addItem("С конца");
-    
     setupLanguageCombo();
     setupPatternCombo();
     setupSideCombo();
@@ -219,6 +205,7 @@ public class MainFrame extends javax.swing.JFrame {
         lblLanguage.setText("jLabel3");
 
         cmbLanguage.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
+        cmbLanguage.addActionListener(this::cmbLanguageActionPerformed);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -338,9 +325,7 @@ public class MainFrame extends javax.swing.JFrame {
     private void btnChooseFolderActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChooseFolderActionPerformed
     JFileChooser fileChooser = new JFileChooser();
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    fileChooser.setDialogTitle(
-        I18n.get("dialog.chooseSource"));
-    //fileChooser.setDialogTitle("Выберите исходную папку");
+    fileChooser.setDialogTitle(I18n.get("dialog.chooseSource"));
 
     int result = fileChooser.showOpenDialog(this);
 
@@ -351,24 +336,18 @@ public class MainFrame extends javax.swing.JFrame {
 
     private void btnRenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRenameActionPerformed
     if (selectedSourceFolder == null) {
-        lblStatus.setText("Сначала выберите исходную папку");
+        lblStatus.setText(I18n.get("status.needSource"));
         return;
     }
-    //    if (selectedDestFolder == null) {
-    //        lblStatus.setText("Сначала выберите папку для копий");
-    //        return;
-    //    }
     if (selectedDestFolder == null) {
-        lblStatus.setText(
-            I18n.get("status.needDest")
+        lblStatus.setText(I18n.get("status.needDest")
         );
         return;
     }
-
     File[] files = selectedSourceFolder.listFiles();
-if (files == null || files.length == 0) {
-    lblStatus.setText("В исходной папке нет файлов");
-    return;
+    if (files == null || files.length == 0) {
+        lblStatus.setText(I18n.get("status.noFiles"));
+        return;
 }
 
 sortFilesNaturally(files);
@@ -378,16 +357,14 @@ sortFilesNaturally(files);
     File outputFolder = new File(selectedDestFolder, "renamed_" + timestamp);
 
     if (!outputFolder.mkdirs()) {
-        lblStatus.setText("Не удалось создать папку для копий");
+        lblStatus.setText(I18n.get("status.cantCreateFolder"));
         return;
     }
-
      RenameStrategy strategy = createStrategy();
      if (strategy == null) {
-       lblStatus.setText("Выберите способ переименования");
+       lblStatus.setText(I18n.get("status.badPattern"));
       return;
      }
-
     int copiedCount = 0;
     int errorCount = 0;
     int index = 1;
@@ -465,6 +442,32 @@ sortFilesNaturally(files);
     private void cmbPatternActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPatternActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_cmbPatternActionPerformed
+
+    private void cmbLanguageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLanguageActionPerformed
+        //Обработчик языка
+        System.out.println(cmbLanguage.getSelectedItem());
+        
+        if (initializing) {
+                return;
+            }
+
+            switch (cmbLanguage.getSelectedIndex()) {
+                case 0:
+                    I18n.setLanguage("ru");
+                    break;
+                case 1:
+                    I18n.setLanguage("en");
+                    break;
+                case 2:
+                    I18n.setLanguage("es");
+                    break;
+                default:
+                    return;
+            }
+
+            updateTexts();
+        
+    }//GEN-LAST:event_cmbLanguageActionPerformed
 
     //new
     private void loadFilesIntoList(File folder) {
@@ -620,17 +623,12 @@ sortFilesNaturally(files);
                 return null;
             }
 
-            RemoveSide side =
-                    cmbSide.getSelectedIndex() == 0
-                            ? RemoveSide.START
-                            : RemoveSide.END;
+            RemoveCharsStrategy.Side side =
+        cmbSide.getSelectedIndex() == 0
+                ? RemoveCharsStrategy.Side.START
+                : RemoveCharsStrategy.Side.END;
 
-            return new RemoveCharsStrategy(
-                    count,
-                    side == RemoveSide.START
-                            ? RemoveCharsStrategy.Side.START
-                            : RemoveCharsStrategy.Side.END
-            );
+        return new RemoveCharsStrategy(count, side);
         }
 
         default:
@@ -742,35 +740,7 @@ case "Удаление N символов": {
 
         cmbLanguage.setSelectedIndex(0);
     }
-        
-             //Обработчик языка
-                private void cmbLanguageActionPerformed(java.awt.event.ActionEvent evt) {
 
-            if (initializing) {
-                return;
-            }
-
-            switch (cmbLanguage.getSelectedIndex()) {
-
-                case 0:
-                    I18n.setLanguage("ru");
-                    break;
-
-                case 1:
-                    I18n.setLanguage("en");
-                    break;
-
-                case 2:
-                    I18n.setLanguage("es");
-                    break;
-
-                default:
-                    return;
-            }
-
-            updateTexts();
-        }
-                
                 
                 //new metod
         private void setupPatternCombo() {
