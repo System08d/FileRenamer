@@ -28,6 +28,7 @@ import java.util.Comparator;
 import filerenamer.i18n.I18n;
 import filerenamer.i18n.RenameMode;
 import filerenamer.i18n.RemoveSide;
+import filerenamer.logic.DateStrategy;
 
 /**
  *
@@ -47,7 +48,7 @@ public class MainFrame extends javax.swing.JFrame {
     private File selectedSourceFolder;
     private File selectedDestFolder;
     private static final String APP_NAME = "File Renamer";
-    private static final String APP_VERSION = "1.9";
+    private static final String APP_VERSION = "2.1";
     
     /**
      * Creates new form MainFrame
@@ -540,6 +541,9 @@ sortFilesNaturally(files);
 
         case RANDOM:
             return new RandomNumberStrategy();
+            
+        case DATE:
+    return new DateStrategy();
 
         case NUMBERING:
             return new NumberingStrategy();

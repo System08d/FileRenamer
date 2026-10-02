@@ -4,17 +4,32 @@
  */
 package filerenamer.logic;
 
+/**
+ *
+ * @author siste
+ */
+
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 /**
+ * Comparator that sorts strings using natural ordering.
  *
- * @author siste
+ * Strings are split into consecutive digit, letter and other-character
+ * tokens. Digit tokens are compared by their numeric value, so values such
+ * as {@code "file2"} and {@code "file10"} are ordered numerically rather
+ * than lexicographically.
+ *
+ * If two numeric tokens have the same numeric value, their original
+ * textual representation is used as a tie-breaker.
  */
+
 public class NaturalOrderComparator implements Comparator<String> {
 
+    // Token categories are ordered deliberately:
+    // digits < letters < other characters.
     private static final int CATEGORY_DIGIT = 0;
     private static final int CATEGORY_LETTER = 1;
     private static final int CATEGORY_OTHER = 2;
@@ -36,6 +51,16 @@ public class NaturalOrderComparator implements Comparator<String> {
         return Integer.compare(tokens1.size(), tokens2.size());
     }
 
+/**
+ * Splits a string into consecutive tokens of the same character category.
+ *
+ * For example, {@code "file123-test"} becomes:
+ * {@code ["file", "123", "-", "test"]}.
+ *
+ * Code points are used instead of {@code char} values so that
+ * supplementary Unicode characters are processed correctly.
+ */
+    
     private List<String> splitIntoTokens(String name) {
         List<String> tokens = new ArrayList<>();
         StringBuilder currentToken = new StringBuilder();
@@ -63,6 +88,7 @@ public class NaturalOrderComparator implements Comparator<String> {
         return tokens;
     }
 
+    // Categories are used to split tokens and determine comparison priority.
     private int categoryOf(int codePoint) {
         if (Character.isDigit(codePoint)) {
             return CATEGORY_DIGIT;
@@ -73,6 +99,14 @@ public class NaturalOrderComparator implements Comparator<String> {
         }
     }
 
+/**
+ * Compares two tokens according to their category.
+ *
+ * Tokens from different categories are ordered by category priority.
+ * Numeric tokens are compared by numeric value; all other tokens use
+ * lexicographical comparison.
+ */
+    
     private int compareTokens(String token1, String token2) {
         int category1 = categoryOf(token1.codePointAt(0));
         int category2 = categoryOf(token2.codePointAt(0));
@@ -88,6 +122,14 @@ public class NaturalOrderComparator implements Comparator<String> {
         }
     }
 
+/**
+ * Compares numeric tokens by their numeric value.
+ *
+ * If both tokens represent the same numeric value, the original
+ * strings are compared to provide a deterministic ordering for
+ * representations with leading zeros.
+ */
+    
     private int compareDigitTokens(String digits1, String digits2) {
         BigInteger value1 = new BigInteger(digits1);
         BigInteger value2 = new BigInteger(digits2);
