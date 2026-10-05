@@ -4,17 +4,31 @@
  */
 package filerenamer.logic;
 
-import java.io.File;
-
 /**
  *
  * @author siste
+ */
+
+import java.io.File;
+
+/**
+ * Generates names by adding a prefix to the original file name.
+ *
+ * The file extension is excluded from the generated name.
+ * For example, {@code "photo.jpg"} with the prefix {@code "new_"}
+ * produces {@code "new_photo"}.
  */
 
 public class PrefixStrategy implements RenameStrategy {
 
     private final String prefix;
 
+ /**
+ * Creates a prefix strategy.
+ *
+ * @param prefix text added before the original base name
+ */
+    
     public PrefixStrategy(String prefix) {
         this.prefix = prefix;
     }

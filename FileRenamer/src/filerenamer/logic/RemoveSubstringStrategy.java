@@ -4,16 +4,27 @@
  */
 package filerenamer.logic;
 
-import java.io.File;
-
 /**
  *
  * @author siste
  */
 
+import java.io.File;
+
+/**
+ * Generates names by removing all occurrences of a specified substring
+ * from the original base name.
+ */
+
 public class RemoveSubstringStrategy implements RenameStrategy {
 
     private final String toRemove;
+    
+/**
+ * Creates a strategy that removes the specified substring.
+ *
+ * @param toRemove substring to remove from the file name
+ */
 
     public RemoveSubstringStrategy(String toRemove) {
         this.toRemove = toRemove;

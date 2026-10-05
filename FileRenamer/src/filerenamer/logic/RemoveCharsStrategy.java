@@ -4,15 +4,28 @@
  */
 package filerenamer.logic;
 
-import java.io.File;
-
 /**
  *
  * @author siste
  * 
  */
 
+import java.io.File;
+
+/**
+ * Generates names by removing a specified number of characters
+ * from the beginning or end of the original base name.
+ *
+ * If the number of characters to remove is greater than or equal
+ * to the base name length, a fallback name in the form
+ * {@code file_<index>} is generated.
+ */
+
 public class RemoveCharsStrategy implements RenameStrategy {
+
+/**
+ * Defines the side from which characters are removed.
+ */
 
     public enum Side {
         START, END
@@ -20,7 +33,15 @@ public class RemoveCharsStrategy implements RenameStrategy {
 
     private final int count;
     private final Side side;
-
+    
+/**
+ * Creates a strategy that removes the specified number of characters
+ * from the selected side of the file name.
+ *
+ * @param count number of characters to remove
+ * @param side side from which characters are removed
+ */
+    
     public RemoveCharsStrategy(int count, Side side) {
         this.count = count;
         this.side = side;

@@ -4,11 +4,15 @@
  */
 package filerenamer.logic;
 
-import java.io.File;
-
 /**
  *
  * @author siste
+ */
+
+import java.io.File;
+
+/**
+ * Generates sequential numeric names based on the file index.
  */
 
 public class NumberingStrategy implements RenameStrategy {

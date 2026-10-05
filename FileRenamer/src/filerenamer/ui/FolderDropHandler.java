@@ -4,6 +4,11 @@
  */
 package filerenamer.ui;
 
+/**
+ *
+ * @author oleksandr.dan
+ */
+
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.dnd.DnDConstants;
@@ -17,19 +22,36 @@ import java.util.function.Consumer;
 import javax.swing.JComponent;
 
 /**
+ * Handles drag-and-drop operations for selecting a folder.
  *
- * @author oleksandr.dan
+ * The handler accepts file-list drops and passes the first dropped
+ * directory to the supplied callback.
  */
 
 public class FolderDropHandler extends DropTargetAdapter {
 
     private final Consumer<File> onFolderDropped;
+    
+/**
+ * Creates a drop handler for the specified component.
+ *
+ * @param targetComponent component that accepts folder drops
+ * @param onFolderDropped callback invoked when a folder is dropped
+ */
 
     public FolderDropHandler(JComponent targetComponent, Consumer<File> onFolderDropped) {
         this.onFolderDropped = onFolderDropped;
         new DropTarget(targetComponent, DnDConstants.ACTION_COPY, this, true);
     }
 
+/**
+ * Processes a dropped file list and notifies the callback when the first
+ * dropped item is a directory.
+ *
+ * The drop is rejected when the data format is unsupported,
+ * the list is empty, or the first item is not a directory.
+ */
+    
     @Override
     @SuppressWarnings("unchecked")
     public void drop(DropTargetDropEvent event) {
@@ -45,9 +67,6 @@ public class FolderDropHandler extends DropTargetAdapter {
                 return;
             }
         } catch (UnsupportedFlavorException | IOException ex) {
-            
-            // We simply don't accept drag and drop if the format is unexpected.
-            
         }
 
         event.dropComplete(false);

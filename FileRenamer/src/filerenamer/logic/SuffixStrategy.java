@@ -4,17 +4,29 @@
  */
 package filerenamer.logic;
 
-import java.io.File;
-
 /**
  *
  * @author siste
  */
 
+import java.io.File;
+
+/**
+ * Generates names by adding a suffix to the original file name.
+ *
+ * The file extension is excluded from the generated name.
+ */
+
 public class SuffixStrategy implements RenameStrategy {
 
     private final String suffix;
-
+    
+/**
+ * Creates a suffix strategy.
+ *
+ * @param suffix text added after the original base name
+ */
+    
     public SuffixStrategy(String suffix) {
         this.suffix = suffix;
     }

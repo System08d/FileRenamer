@@ -9,6 +9,13 @@ package filerenamer.logic;
  * @author oleksandr.dan
  */
 
+import com.drew.imaging.ImageMetadataReader;
+import com.drew.imaging.ImageProcessingException;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.exif.ExifSubIFDDirectory;
+import com.drew.metadata.mp4.Mp4Directory;
+import com.drew.metadata.mov.QuickTimeDirectory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -17,6 +24,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -41,6 +49,66 @@ public class DateStrategy implements RenameStrategy {
     }
 
     private LocalDate extractDate(File file) {
+        LocalDate embedded = extractEmbeddedDate(file);
+        if (embedded != null) {
+            return embedded;
+        }
+        return extractFileSystemDate(file);
+    }
+
+    private static final int MIN_PLAUSIBLE_YEAR = 1990;
+
+    private LocalDate extractEmbeddedDate(File file) {
+        try {
+            Metadata metadata = ImageMetadataReader.readMetadata(file);
+
+            ExifSubIFDDirectory exif = metadata.getFirstDirectoryOfType(ExifSubIFDDirectory.class);
+            if (exif != null) {
+                Date date = exif.getDate(ExifSubIFDDirectory.TAG_DATETIME_ORIGINAL);
+                if (date != null) {
+                    LocalDate localDate = toLocalDate(date);
+                    if (isPlausible(localDate)) {
+                        return localDate;
+                    }
+                }
+            }
+
+            Mp4Directory mp4 = metadata.getFirstDirectoryOfType(Mp4Directory.class);
+            if (mp4 != null) {
+                Date date = mp4.getDate(Mp4Directory.TAG_CREATION_TIME);
+                if (date != null) {
+                    LocalDate localDate = toLocalDate(date);
+                    if (isPlausible(localDate)) {
+                        return localDate;
+                    }
+                }
+            }
+
+            QuickTimeDirectory mov = metadata.getFirstDirectoryOfType(QuickTimeDirectory.class);
+            if (mov != null) {
+                Date date = mov.getDate(QuickTimeDirectory.TAG_CREATION_TIME);
+                if (date != null) {
+                    LocalDate localDate = toLocalDate(date);
+                    if (isPlausible(localDate)) {
+                        return localDate;
+                    }
+                }
+            }
+
+        } catch (ImageProcessingException | IOException ex) {
+            // Файл не поддерживается библиотекой, повреждён, или без метаданных
+        }
+
+        return null;
+    }
+
+    private boolean isPlausible(LocalDate date) {
+        int year = date.getYear();
+        int maxYear = LocalDate.now().getYear() + 1;
+        return year >= MIN_PLAUSIBLE_YEAR && year <= maxYear;
+    }
+
+    private LocalDate extractFileSystemDate(File file) {
         try {
             BasicFileAttributes attrs =
                     Files.readAttributes(file.toPath(), BasicFileAttributes.class);
@@ -50,10 +118,18 @@ public class DateStrategy implements RenameStrategy {
 
             Instant older = created.isBefore(modified) ? created : modified;
 
-            return older.atZone(ZoneId.systemDefault()).toLocalDate();
+            return toLocalDate(older);
 
         } catch (IOException ex) {
             return LocalDate.now();
         }
+    }
+
+    private LocalDate toLocalDate(Date date) {
+        return toLocalDate(date.toInstant());
+    }
+
+    private LocalDate toLocalDate(Instant instant) {
+        return instant.atZone(ZoneId.systemDefault()).toLocalDate();
     }
 }

@@ -48,7 +48,7 @@ public class MainFrame extends javax.swing.JFrame {
     private File selectedSourceFolder;
     private File selectedDestFolder;
     private static final String APP_NAME = "File Renamer";
-    private static final String APP_VERSION = "2.1";
+    private static final String APP_VERSION = "2.2";
     
     /**
      * Creates new form MainFrame

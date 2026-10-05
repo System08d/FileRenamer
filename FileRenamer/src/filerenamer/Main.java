@@ -10,11 +10,16 @@ import filerenamer.ui.MainFrame;
  *
  * @author siste
  */
-public class Main {
 
-    /**
-     * @param args the command line arguments
-     */
+public class Main {
+    
+/**
+ * Application entry point.
+ *
+ * Initializes the Swing look and feel and starts the main application
+ * window on the AWT event dispatch thread.
+ */
+    
     public static void main(String[] args) {
         try {
             for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
