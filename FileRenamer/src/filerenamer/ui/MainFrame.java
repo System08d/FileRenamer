@@ -6,6 +6,13 @@ package filerenamer.ui;
 
 //All imports
 
+/**
+ *
+ * @author siste
+ * @author oleksandr.dan
+ * 
+ */
+
 import javax.swing.JFileChooser;
 import javax.swing.DefaultListModel;
 import java.io.File;
@@ -31,14 +38,19 @@ import filerenamer.i18n.RemoveSide;
 import filerenamer.logic.DateStrategy;
 
 /**
+ * Main application window for the File Renamer.
  *
- * @author siste
- * @author oleksandr.dan
- * 
+ * Provides the user interface for selecting source and destination
+ * folders, choosing a renaming pattern, changing the application language,
+ * and starting the file renaming operation.
+ *
+ * The frame is responsible for connecting the UI with the renaming
+ * strategies and updating localized interface text.
  */
 
 public class MainFrame extends javax.swing.JFrame {
     
+    // Prevents UI change listeners from running during initial setup.
     private boolean initializing = true;
     
     //Loggs
@@ -48,10 +60,10 @@ public class MainFrame extends javax.swing.JFrame {
     private File selectedSourceFolder;
     private File selectedDestFolder;
     private static final String APP_NAME = "File Renamer";
-    private static final String APP_VERSION = "2.2";
+    private static final String APP_VERSION = "2.3";
     
     /**
-     * Creates new form MainFrame
+     * Creates and initializes the main application window.
      */
     
     public MainFrame() {
@@ -311,13 +323,19 @@ public class MainFrame extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-        private void handleSourceFolderSelected(File folder) {
+  
+    private void handleSourceFolderSelected(File folder) {
         selectedSourceFolder = folder;
         lblFolderPath.setText(folder.getAbsolutePath());
         loadFilesIntoList(folder);
     }
 
+/**
+ * Sets the selected source folder and refreshes the file list.
+ *
+ * @param folder selected source folder
+ */
+    
     private void handleDestFolderSelected(File folder) {
         selectedDestFolder = folder;
         lblDestPath.setText(folder.getAbsolutePath());
@@ -335,6 +353,21 @@ public class MainFrame extends javax.swing.JFrame {
     }
     }//GEN-LAST:event_btnChooseFolderActionPerformed
 
+/**
+ * Performs the file renaming operation.
+ *
+ * The selected source files are sorted using natural ordering,
+ * renamed according to the selected strategy, and copied to a newly
+ * created timestamped destination folder.
+ *
+ * The original file extension is preserved. When a generated name
+ * already exists, another name is generated until a unique destination
+ * is found.
+ *
+ * The UI status is updated with the number of successfully copied
+ * files and any errors encountered during the operation.
+ */
+    
     private void btnRenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRenameActionPerformed
     if (selectedSourceFolder == null) {
         lblStatus.setText(I18n.get("status.needSource"));
@@ -351,6 +384,7 @@ public class MainFrame extends javax.swing.JFrame {
         return;
 }
 
+// Keep processing order consistent with the order shown in the file list.
 sortFilesNaturally(files);
 
     String timestamp = LocalDateTime.now().format(
@@ -384,6 +418,8 @@ sortFilesNaturally(files);
 
         String newName;
         File destFile;
+        
+        // Ensure that generated names do not overwrite existing files.
         do {
             newName = strategy.generateName(f, index) + extension;
             destFile = new File(outputFolder, newName);
@@ -393,13 +429,14 @@ sortFilesNaturally(files);
             Files.copy(f.toPath(), destFile.toPath());
             copiedCount++;
         } catch (IOException ex) {
+            // Continue processing the remaining files if one copy operation fails.
             errorCount++;
             logger.log(java.util.logging.Level.WARNING, "Не удалось скопировать: " + f.getName(), ex);
         }
 
         index++;
     }
-    //new
+    
     if (errorCount > 0) {
 
     lblStatus.setText(
@@ -422,10 +459,6 @@ sortFilesNaturally(files);
     );
 }
 
-    //old
-//    lblStatus.setText("Скопировано: " + copiedCount
-//            + (errorCount > 0 ? ", ошибок: " + errorCount : "")
-//            + " → папка " + outputFolder.getName());
     }//GEN-LAST:event_btnRenameActionPerformed
 
     private void btnChooseDestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChooseDestActionPerformed
@@ -441,17 +474,19 @@ sortFilesNaturally(files);
     }//GEN-LAST:event_btnChooseDestActionPerformed
 
     private void cmbPatternActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPatternActionPerformed
-        // TODO add your handling code here:
+
     }//GEN-LAST:event_cmbPatternActionPerformed
 
     private void cmbLanguageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLanguageActionPerformed
-        //Обработчик языка
+
         System.out.println(cmbLanguage.getSelectedItem());
         
+        // Ignore the initial selection made while the language selector is being populated.
         if (initializing) {
                 return;
             }
 
+            // Keep the language codes aligned with the order of items in cmbLanguage.
             switch (cmbLanguage.getSelectedIndex()) {
                 case 0:
                     I18n.setLanguage("ru");
@@ -470,7 +505,15 @@ sortFilesNaturally(files);
         
     }//GEN-LAST:event_cmbLanguageActionPerformed
 
-    //new
+/**
+ * Loads all files from the selected folder into the file list.
+ *
+ * Files are displayed using natural name ordering. Directories are
+ * ignored.
+ *
+ * @param folder folder whose files should be displayed
+ */
+    
     private void loadFilesIntoList(File folder) {
 
     DefaultListModel<String> model =
@@ -500,30 +543,33 @@ sortFilesNaturally(files);
     );
 }
     
-    //old
-//    private void loadFilesIntoList(File folder) {
-//    DefaultListModel<String> model = new DefaultListModel<>();
-//
-//    File[] files = folder.listFiles();
-//
-//    if (files != null) {
-//        sortFilesNaturally(files);
-//        for (File f : files) {
-//            if (f.isFile()) {
-//                model.addElement(f.getName());
-//            }
-//        }
-//    }
-//
-//    listFiles.setModel(model);
-//    lblStatus.setText("Найдено файлов: " + model.getSize());
-//}
+/**
+ * Sorts files by name using natural ordering.
+ *
+ * Natural ordering places numeric parts according to their numeric
+ * value rather than lexicographically.
+ *
+ * @param files files to sort in place
+ */
     
     private void sortFilesNaturally(File[] files) {
     Arrays.sort(files, Comparator.comparing(File::getName, new NaturalOrderComparator()));
 }
     
-    //new
+/**
+ * Creates a renaming strategy based on the current UI selections.
+ *
+ * The selected {@link RenameMode} determines which
+ * {@link RenameStrategy} implementation is created. Additional input
+ * fields are validated when required by the selected strategy.
+ *
+ * If the selection or its required input is invalid, {@code null}
+ * is returned.
+ *
+ * @return configured renaming strategy, or {@code null} when the current
+ *         input cannot be used to create one
+ */
+    
     private RenameStrategy createStrategy() {
 
     int selectedIndex = cmbPattern.getSelectedIndex();
@@ -627,6 +673,7 @@ sortFilesNaturally(files);
                 return null;
             }
 
+            // The side combo follows the same order as RemoveCharsStrategy.Side.
             RemoveCharsStrategy.Side side =
         cmbSide.getSelectedIndex() == 0
                 ? RemoveCharsStrategy.Side.START
@@ -640,83 +687,14 @@ sortFilesNaturally(files);
     }
 }
     
-    //old
-   /** private RenameStrategy createStrategy() {
-    String selected = (String) cmbPattern.getSelectedItem();
-    if (selected == null) {
-        return null;
-    }
-
-    switch (selected) {
-        case "Случайное число":
-            return new RandomNumberStrategy();
-        case "Нумерация":
-            return new NumberingStrategy();
-            case "Нумерация с числа": {
-                String text = txtInputText.getText();
-                if (text == null || text.isBlank()) {
-                    return null;
-                }
-                try {
-                    int start = Integer.parseInt(text.trim());
-                    return new NumberingFromStrategy(start);
-                } catch (NumberFormatException ex) {
-                    return null;
-                }
-            }
-        case "Префикс": {
-            String text = txtInputText.getText();
-            if (text == null || text.isBlank()) {
-                return null;
-            }
-            return new PrefixStrategy(text);
-        }
-        case "Суффикс": {
-            String text = txtInputText.getText();
-            if (text == null || text.isBlank()) {
-                return null;
-            }
-            return new SuffixStrategy(text);
-        }
-        case "Слово + номер": {
-    String text = txtInputText.getText();
-    if (text == null || text.isBlank()) {
-        return null;
-    }
-    return new WordNumberStrategy(text);
-}
-case "Удаление подстроки": {
-    String text = txtInputText.getText();
-    if (text == null || text.isBlank()) {
-        return null;
-    }
-    return new RemoveSubstringStrategy(text);
-}
-case "Удаление N символов": {
-    int count;
-    try {
-        count = Integer.parseInt(txtCharCount.getText().trim());
-    } catch (NumberFormatException ex) {
-        return null;
-    }
-    if (count < 0) {
-        return null;
-    }
-    String sideText = (String) cmbSide.getSelectedItem();
-    RemoveCharsStrategy.Side side = "С начала".equals(sideText)
-            ? RemoveCharsStrategy.Side.START
-            : RemoveCharsStrategy.Side.END;
-    return new RemoveCharsStrategy(count, side);
-        }
-        default:
-            return null;
-    }
-}
-  */
+/**
+ * Loads the available application icons in several sizes.
+ *
+ * Missing icon files are ignored and logged as warnings.
+ *
+ * @return list of successfully loaded application icons
+ */
     
-    
-    
-    // This method adds logo with diferent sizes (16, 24, 32, 48, 64, 128, 256) px each
     private java.util.List<java.awt.Image> loadIconImages() {
     int[] sizes = {16, 24, 32, 48, 64, 128, 256};
     java.util.List<java.awt.Image> icons = new java.util.ArrayList<>();
@@ -733,7 +711,10 @@ case "Удаление N символов": {
     return icons;
 }
     
-    // Метод для выбора языка
+/**
+ * Initializes the language selector with the languages supported by the UI.
+ */
+    
         private void setupLanguageCombo() {
 
         cmbLanguage.removeAllItems();
@@ -745,8 +726,13 @@ case "Удаление N символов": {
         cmbLanguage.setSelectedIndex(0);
     }
 
-                
-                //new metod
+/**
+ * Initializes the pattern selector using the available rename modes.
+ *
+ * Display names are resolved through the current localization
+ * settings.
+ */
+        
         private void setupPatternCombo() {
 
     cmbPattern.removeAllItems();
@@ -758,7 +744,16 @@ case "Удаление N символов": {
     cmbPattern.setSelectedIndex(0);
 }
         
-        //new mhetod
+/**
+ * Updates all localized UI text using the currently selected language.
+ *
+ * Dynamic values such as selected folder paths are preserved while
+ * localized labels, buttons, hints, and combo box items are refreshed.
+ *
+ * This method should be called after changing the application's
+ * language.
+ */
+        
         private void updateTexts() {
 
     setTitle(APP_NAME + " V" + APP_VERSION);
@@ -813,7 +808,13 @@ case "Удаление N символов": {
     setupSideCombo();
 }
         
-        // OTHER MHETOD
+/**
+ * Initializes the side selector using the available removal sides.
+ *
+ * The current selection is preserved when possible so that changing
+ * the application language does not unexpectedly reset the user's choice.
+ */
+        
         private void setupSideCombo() {
 
     int selectedIndex = cmbSide.getSelectedIndex();
