@@ -66,11 +66,7 @@ public class DateStrategy implements RenameStrategy {
 
         int count = usedNames.merge(baseName, 1, Integer::sum);
 
-        if (count == 1) {
-            return baseName;
-        } else {
-            return baseName + " (" + count + ")";
-        }
+        return baseName + "_" + String.format("%02d", count);
     }
     
 /**
