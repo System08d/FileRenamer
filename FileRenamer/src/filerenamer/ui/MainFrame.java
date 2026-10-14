@@ -36,6 +36,14 @@ import filerenamer.i18n.I18n;
 import filerenamer.i18n.RenameMode;
 import filerenamer.i18n.RemoveSide;
 import filerenamer.logic.DateStrategy;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutionException;
+import javax.swing.SwingWorker;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.table.DefaultTableModel;
+
 
 /**
  * Main application window for the File Renamer.
@@ -59,8 +67,27 @@ public class MainFrame extends javax.swing.JFrame {
     
     private File selectedSourceFolder;
     private File selectedDestFolder;
+    
+    
+/** Archivos ordenados de la carpeta de origen. */
+private List<File> sourceFiles = new ArrayList<>();
+
+/** Modelo de datos de la tabla de vista previa. */
+private final DefaultTableModel previewModel = new DefaultTableModel() {
+    @Override
+    public boolean isCellEditable(int row, int column) {
+        return false;
+    }
+};
+/** Пересчёт превью запускается через 300 мс после последнего изменения. */
+private final javax.swing.Timer previewTimer =
+        new javax.swing.Timer(300, e -> refreshPreview());
+
+/** Текущий фоновый расчёт превью (чтобы отменить устаревший). */
+private SwingWorker<List<Object[]>, Void> previewWorker;
+    
     private static final String APP_NAME = "File Renamer";
-    private static final String APP_VERSION = "2.3";
+    private static final String APP_VERSION = "2.5";
     
     /**
      * Creates and initializes the main application window.
@@ -85,6 +112,34 @@ public class MainFrame extends javax.swing.JFrame {
     setupLanguageCombo();
     setupPatternCombo();
     setupSideCombo();
+    
+        tblPreview.setModel(previewModel);
+
+        progressBar.setStringPainted(true);   // показывать проценты текстом
+        progressBar.setValue(0);
+
+        previewTimer.setRepeats(false);       // сработать один раз, а не по кругу
+
+        DocumentListener previewListener = new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                schedulePreview();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                schedulePreview();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                schedulePreview();
+            }
+        };
+        txtInputText.getDocument().addDocumentListener(previewListener);
+        txtCharCount.getDocument().addDocumentListener(previewListener);
+
+        cmbSide.addActionListener(e -> schedulePreview());
 
     updateTexts();
 
@@ -114,7 +169,7 @@ public class MainFrame extends javax.swing.JFrame {
         btnChooseFolder = new javax.swing.JButton();
         lblFolderPath = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        listFiles = new javax.swing.JList<>();
+        tblPreview = new javax.swing.JTable();
         btnRename = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         btnChooseDest = new javax.swing.JButton();
@@ -132,6 +187,7 @@ public class MainFrame extends javax.swing.JFrame {
         lblDropDestHint = new javax.swing.JLabel();
         lblLanguage = new javax.swing.JLabel();
         cmbLanguage = new javax.swing.JComboBox<>();
+        progressBar = new javax.swing.JProgressBar();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(217, 74, 195));
@@ -141,12 +197,18 @@ public class MainFrame extends javax.swing.JFrame {
 
         lblFolderPath.setText("Папка не выбрана");
 
-        listFiles.setModel(new javax.swing.AbstractListModel<String>() {
-            String[] strings = { "Item 1", "Item 2", "Item 3", "Item 4", "Item 5" };
-            public int getSize() { return strings.length; }
-            public String getElementAt(int i) { return strings[i]; }
-        });
-        jScrollPane1.setViewportView(listFiles);
+        tblPreview.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Title 1", "Title 2", "Title 3", "Title 4"
+            }
+        ));
+        jScrollPane1.setViewportView(tblPreview);
 
         btnRename.setText("Переименовать");
         btnRename.addActionListener(this::btnRenameActionPerformed);
@@ -212,7 +274,7 @@ public class MainFrame extends javax.swing.JFrame {
             .addGroup(pnlDropDestLayout.createSequentialGroup()
                 .addGap(15, 15, 15)
                 .addComponent(lblDropDestHint)
-                .addContainerGap(17, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         lblLanguage.setText("jLabel3");
@@ -241,39 +303,43 @@ public class MainFrame extends javax.swing.JFrame {
                                 .addComponent(txtInputText, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
                         .addGap(0, 636, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addContainerGap()
-                                .addComponent(lblLanguage))
-                            .addComponent(cmbLanguage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(lblDestPath, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lblInputText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(lblFolderPath, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(47, 47, 47)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(btnChooseFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
-                                    .addComponent(pnlDropSource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 402, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(btnRename, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(107, 107, 107))
-                            .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addContainerGap()
+                                        .addComponent(lblLanguage))
+                                    .addComponent(cmbLanguage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(lblDestPath, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(lblInputText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(lblFolderPath, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addGroup(layout.createSequentialGroup()
+                                        .addGap(47, 47, 47)
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                            .addComponent(btnChooseFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
+                                            .addComponent(pnlDropSource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(127, 127, 127)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(btnChooseDest, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE)
+                                    .addComponent(pnlDropDest, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
+                            .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
                 .addContainerGap())
-            .addGroup(layout.createSequentialGroup()
-                .addGap(127, 127, 127)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(btnChooseDest, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE)
-                    .addComponent(pnlDropDest, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -294,7 +360,9 @@ public class MainFrame extends javax.swing.JFrame {
                                 .addComponent(btnChooseFolder)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(lblFolderPath)))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addGap(12, 12, 12)
+                        .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(pnlDropDest, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(btnChooseDest)
@@ -327,7 +395,9 @@ public class MainFrame extends javax.swing.JFrame {
     private void handleSourceFolderSelected(File folder) {
         selectedSourceFolder = folder;
         lblFolderPath.setText(folder.getAbsolutePath());
-        loadFilesIntoList(folder);
+        loadSourceFiles(folder);
+        lblStatus.setText(I18n.get("status.found", sourceFiles.size()));
+        refreshPreview();
     }
 
 /**
@@ -369,96 +439,50 @@ public class MainFrame extends javax.swing.JFrame {
  */
     
     private void btnRenameActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnRenameActionPerformed
-    if (selectedSourceFolder == null) {
-        lblStatus.setText(I18n.get("status.needSource"));
-        return;
-    }
-    if (selectedDestFolder == null) {
-        lblStatus.setText(I18n.get("status.needDest")
-        );
-        return;
-    }
-    File[] files = selectedSourceFolder.listFiles();
-    if (files == null || files.length == 0) {
-        lblStatus.setText(I18n.get("status.noFiles"));
-        return;
-}
-
-// Keep processing order consistent with the order shown in the file list.
-sortFilesNaturally(files);
-
-    String timestamp = LocalDateTime.now().format(
-            DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
-    File outputFolder = new File(selectedDestFolder, "renamed_" + timestamp);
-
-    if (!outputFolder.mkdirs()) {
-        lblStatus.setText(I18n.get("status.cantCreateFolder"));
-        return;
-    }
-     RenameStrategy strategy = createStrategy();
-     if (strategy == null) {
-       lblStatus.setText(I18n.get("status.badPattern"));
-      return;
-     }
-    int copiedCount = 0;
-    int errorCount = 0;
-    int index = 1;
-
-    for (File f : files) {
-        if (!f.isFile()) {
-            continue;
+        if (selectedSourceFolder == null) {
+            lblStatus.setText(I18n.get("status.needSource"));
+            return;
+        }
+        if (selectedDestFolder == null) {
+            lblStatus.setText(I18n.get("status.needDest"));
+            return;
         }
 
-        String extension = "";
-        String name = f.getName();
-        int dotIndex = name.lastIndexOf('.');
-        if (dotIndex > 0) {
-            extension = name.substring(dotIndex);
+        loadSourceFiles(selectedSourceFolder);   // вдруг содержимое папки изменилось
+        if (sourceFiles.isEmpty()) {
+            lblStatus.setText(I18n.get("status.noFiles"));
+            return;
         }
 
-        String newName;
-        File destFile;
-        
-        // Ensure that generated names do not overwrite existing files.
-        do {
-            newName = strategy.generateName(f, index) + extension;
-            destFile = new File(outputFolder, newName);
-        } while (destFile.exists());
-
-        try {
-            Files.copy(f.toPath(), destFile.toPath());
-            copiedCount++;
-        } catch (IOException ex) {
-            // Continue processing the remaining files if one copy operation fails.
-            errorCount++;
-            logger.log(java.util.logging.Level.WARNING, "Не удалось скопировать: " + f.getName(), ex);
+        RenameStrategy strategy = createStrategy();
+        if (strategy == null) {
+            lblStatus.setText(I18n.get("status.badPattern"));
+            return;
         }
 
-        index++;
-    }
-    
-    if (errorCount > 0) {
+        String timestamp = LocalDateTime.now().format(
+                DateTimeFormatter.ofPattern("yyyy-MM-dd_HH-mm-ss"));
+        File outputFolder = new File(selectedDestFolder, "renamed_" + timestamp);
 
-    lblStatus.setText(
-            I18n.get(
-                    "status.copiedWithErrors",
-                    copiedCount,
-                    errorCount,
-                    outputFolder.getName()
-            )
-    );
+        if (!outputFolder.mkdirs()) {
+            lblStatus.setText(I18n.get("status.cantCreateFolder"));
+            return;
+        }
 
-} else {
+        btnRename.setEnabled(false);                 // защита от двойного нажатия
+        progressBar.setMaximum(sourceFiles.size());
+        progressBar.setValue(0);
 
-    lblStatus.setText(
-            I18n.get(
-                    "status.copied",
-                    copiedCount,
-                    outputFolder.getName()
-            )
-    );
-}
-
+        new CopyTask(sourceFiles, strategy, outputFolder, progressBar, (copied, errors) -> {
+            btnRename.setEnabled(true);
+            if (errors > 0) {
+                lblStatus.setText(I18n.get("status.copiedWithErrors",
+                        copied, errors, outputFolder.getName()));
+            } else {
+                lblStatus.setText(I18n.get("status.copied",
+                        copied, outputFolder.getName()));
+            }
+        }).execute();
     }//GEN-LAST:event_btnRenameActionPerformed
 
     private void btnChooseDestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChooseDestActionPerformed
@@ -474,7 +498,7 @@ sortFilesNaturally(files);
     }//GEN-LAST:event_btnChooseDestActionPerformed
 
     private void cmbPatternActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPatternActionPerformed
-
+   schedulePreview();
     }//GEN-LAST:event_cmbPatternActionPerformed
 
     private void cmbLanguageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLanguageActionPerformed
@@ -505,43 +529,6 @@ sortFilesNaturally(files);
         
     }//GEN-LAST:event_cmbLanguageActionPerformed
 
-/**
- * Loads all files from the selected folder into the file list.
- *
- * Files are displayed using natural name ordering. Directories are
- * ignored.
- *
- * @param folder folder whose files should be displayed
- */
-    
-    private void loadFilesIntoList(File folder) {
-
-    DefaultListModel<String> model =
-            new DefaultListModel<>();
-
-    File[] files = folder.listFiles();
-
-    if (files != null) {
-
-        sortFilesNaturally(files);
-
-        for (File f : files) {
-
-            if (f.isFile()) {
-                model.addElement(f.getName());
-            }
-        }
-    }
-
-    listFiles.setModel(model);
-
-    lblStatus.setText(
-            I18n.get(
-                    "status.found",
-                    model.getSize()
-            )
-    );
-}
     
 /**
  * Sorts files by name using natural ordering.
@@ -733,16 +720,14 @@ sortFilesNaturally(files);
  * settings.
  */
         
-        private void setupPatternCombo() {
-
-    cmbPattern.removeAllItems();
-
-    for (RenameMode mode : RenameMode.values()) {
-        cmbPattern.addItem(I18n.get(mode.getKey()));
+    private void setupPatternCombo() {
+        int selectedIndex = cmbPattern.getSelectedIndex();
+        cmbPattern.removeAllItems();
+        for (RenameMode mode : RenameMode.values()) {
+            cmbPattern.addItem(I18n.get(mode.getKey()));
+        }
+        cmbPattern.setSelectedIndex(selectedIndex >= 0 ? selectedIndex : 0);
     }
-
-    cmbPattern.setSelectedIndex(0);
-}
         
 /**
  * Updates all localized UI text using the currently selected language.
@@ -806,6 +791,7 @@ sortFilesNaturally(files);
 
     setupPatternCombo();
     setupSideCombo();
+    updateTableHeaders();
 }
         
 /**
@@ -834,6 +820,91 @@ sortFilesNaturally(files);
         cmbSide.setSelectedIndex(0);
     }
 }
+        
+        /** Откладывает пересчёт на 300 мс; каждое новое нажатие сбрасывает отсчёт. */
+private void schedulePreview() {
+    previewTimer.restart();
+}
+
+/** Пересчитывает таблицу «старое → новое» в фоновом потоке. */
+private void refreshPreview() {
+    if (previewWorker != null) {
+        previewWorker.cancel(true);       // прошлый расчёт уже не нужен
+    }
+
+    if (selectedSourceFolder == null) {
+        previewModel.setRowCount(0);
+        return;
+    }
+
+    // Читаем поля формы здесь, в потоке окна: из фонового потока Swing трогать нельзя.
+    final List<File> files = sourceFiles;
+    final RenameStrategy strategy = createStrategy();
+
+    previewWorker = new SwingWorker<List<Object[]>, Void>() {
+        @Override
+        protected List<Object[]> doInBackground() {
+            List<Object[]> rows = new ArrayList<>();
+            int index = 1;
+            for (File f : files) {
+                if (isCancelled()) {
+                    break;
+                }
+                String newName = "—";
+                if (strategy != null) {
+                    newName = strategy.generateName(f, index) + getExtension(f);
+                }
+                rows.add(new Object[]{f.getName(), newName});
+                index++;
+            }
+            return rows;
+        }
+
+        @Override
+        protected void done() {
+            if (isCancelled()) {
+                return;
+            }
+            try {
+                previewModel.setRowCount(0);
+                for (Object[] row : get()) {
+                    previewModel.addRow(row);
+                }
+            } catch (InterruptedException | ExecutionException ex) {
+                logger.log(java.util.logging.Level.WARNING, "Preview failed", ex);
+            }
+        }
+    };
+    previewWorker.execute();
+}
+
+private String getExtension(File file) {
+    String name = file.getName();
+    int dotIndex = name.lastIndexOf('.');
+    return (dotIndex > 0) ? name.substring(dotIndex) : "";
+}
+
+private void updateTableHeaders() {
+    previewModel.setColumnIdentifiers(new Object[]{
+        I18n.get("table.oldName"),
+        I18n.get("table.newName")
+    });
+}
+
+/** Читает и сортирует файлы папки (вложенные папки пропускает). */
+private void loadSourceFiles(File folder) {
+    sourceFiles = new ArrayList<>();
+    File[] files = folder.listFiles();
+    if (files == null) {
+        return;
+    }
+    sortFilesNaturally(files);
+    for (File f : files) {
+        if (f.isFile()) {
+            sourceFiles.add(f);
+        }
+    }
+}
     
     /**
      * @param args the command line arguments
@@ -856,9 +927,10 @@ sortFilesNaturally(files);
     private javax.swing.JLabel lblInputText;
     private javax.swing.JLabel lblLanguage;
     private javax.swing.JLabel lblStatus;
-    private javax.swing.JList<String> listFiles;
     private javax.swing.JPanel pnlDropDest;
     private javax.swing.JPanel pnlDropSource;
+    private javax.swing.JProgressBar progressBar;
+    private javax.swing.JTable tblPreview;
     private javax.swing.JTextField txtCharCount;
     private javax.swing.JTextField txtInputText;
     // End of variables declaration//GEN-END:variables
