@@ -137,11 +137,15 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
             }
         };
         txtInputText.getDocument().addDocumentListener(previewListener);
-        txtCharCount.getDocument().addDocumentListener(previewListener);
 
         cmbSide.addActionListener(e -> schedulePreview());
 
+    txtInputText.setText("");
     updateTexts();
+    lblStatus.setText(I18n.get("status.chooseFolders"));
+    updateInputFields();
+    updateDropZoneBorders();
+    updateTableHint();
 
     new FolderDropHandler(
             pnlDropSource,
@@ -169,7 +173,7 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
         btnChooseFolder = new javax.swing.JButton();
         lblFolderPath = new javax.swing.JLabel();
         jScrollPane1 = new javax.swing.JScrollPane();
-        tblPreview = new javax.swing.JTable();
+        tblPreview = new PreviewTable();
         btnRename = new javax.swing.JButton();
         lblStatus = new javax.swing.JLabel();
         btnChooseDest = new javax.swing.JButton();
@@ -178,7 +182,6 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
         jLabel1 = new javax.swing.JLabel();
         txtInputText = new javax.swing.JTextField();
         lblInputText = new javax.swing.JLabel();
-        txtCharCount = new javax.swing.JTextField();
         cmbSide = new javax.swing.JComboBox<>();
         jLabel2 = new javax.swing.JLabel();
         pnlDropSource = new javax.swing.JPanel();
@@ -229,8 +232,6 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
 
         lblInputText.setText("Текст для паттернов");
 
-        txtCharCount.setText("Кол-во символов");
-
         cmbSide.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
         jLabel2.setText("Сторона");
@@ -244,16 +245,16 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
         pnlDropSourceLayout.setHorizontalGroup(
             pnlDropSourceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlDropSourceLayout.createSequentialGroup()
-                .addGap(29, 29, 29)
+                .addGap(32, 32, 32)
                 .addComponent(lblDropSourceHint)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(31, Short.MAX_VALUE))
         );
         pnlDropSourceLayout.setVerticalGroup(
             pnlDropSourceLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlDropSourceLayout.createSequentialGroup()
-                .addGap(16, 16, 16)
+                .addGap(15, 15, 15)
                 .addComponent(lblDropSourceHint)
-                .addContainerGap(16, Short.MAX_VALUE))
+                .addContainerGap(17, Short.MAX_VALUE))
         );
 
         pnlDropDest.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
@@ -267,14 +268,14 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
             .addGroup(pnlDropDestLayout.createSequentialGroup()
                 .addGap(32, 32, 32)
                 .addComponent(lblDropDestHint)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(32, Short.MAX_VALUE))
         );
         pnlDropDestLayout.setVerticalGroup(
             pnlDropDestLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(pnlDropDestLayout.createSequentialGroup()
-                .addGap(15, 15, 15)
+                .addContainerGap()
                 .addComponent(lblDropDestHint)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(27, Short.MAX_VALUE))
         );
 
         lblLanguage.setText("jLabel3");
@@ -287,58 +288,49 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addGroup(javax.swing.GroupLayout.Alignment.LEADING, layout.createSequentialGroup()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(125, 125, 125)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(txtCharCount, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
-                                    .addComponent(cmbSide, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(126, 126, 126)
+                                .addGap(101, 101, 101)
                                 .addComponent(cmbPattern, javax.swing.GroupLayout.PREFERRED_SIZE, 185, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(layout.createSequentialGroup()
-                                .addGap(127, 127, 127)
+                                .addGap(100, 100, 100)
                                 .addComponent(txtInputText, javax.swing.GroupLayout.PREFERRED_SIZE, 190, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(0, 636, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(btnRename, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(107, 107, 107))
-                            .addComponent(lblStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lblLanguage))
+                            .addComponent(cmbLanguage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(cmbSide, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(431, 431, 431)
+                                .addComponent(btnRename, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addContainerGap()
-                                        .addComponent(lblLanguage))
-                                    .addComponent(cmbLanguage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(lblDestPath, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(lblInputText, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(lblInputText, javax.swing.GroupLayout.PREFERRED_SIZE, 507, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE)
                                     .addComponent(lblFolderPath, javax.swing.GroupLayout.PREFERRED_SIZE, 313, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addGap(47, 47, 47)
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                            .addComponent(btnChooseFolder, javax.swing.GroupLayout.DEFAULT_SIZE, 188, Short.MAX_VALUE)
-                                            .addComponent(pnlDropSource, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED))
-                            .addGroup(layout.createSequentialGroup()
-                                .addGap(127, 127, 127)
+                                    .addComponent(lblDestPath, javax.swing.GroupLayout.PREFERRED_SIZE, 461, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                    .addComponent(btnChooseDest, javax.swing.GroupLayout.DEFAULT_SIZE, 189, Short.MAX_VALUE)
-                                    .addComponent(pnlDropDest, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
-                            .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 402, Short.MAX_VALUE)
+                                    .addComponent(progressBar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(21, 21, 21)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(pnlDropDest, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnChooseFolder, javax.swing.GroupLayout.PREFERRED_SIZE, 188, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(pnlDropSource, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                    .addComponent(btnChooseDest, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                            .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 507, javax.swing.GroupLayout.PREFERRED_SIZE))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -347,63 +339,67 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(lblLanguage)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(lblLanguage)
+                            .addComponent(lblFolderPath))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbLanguage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(cmbLanguage, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(pnlDropSource, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(btnChooseFolder)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(lblDestPath))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(layout.createSequentialGroup()
-                                .addComponent(pnlDropSource, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(btnChooseFolder)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(lblFolderPath)))
+                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 111, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(12, 12, 12)
-                        .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(pnlDropDest, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(btnChooseDest)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblDestPath)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(cmbPattern, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel1)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtInputText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(lblInputText)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(txtCharCount, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(btnRename)
-                            .addComponent(cmbSide, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                        .addGap(18, 18, 18)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(lblStatus)
-                            .addComponent(jLabel2))
-                        .addGap(26, 26, 26))))
+                        .addComponent(progressBar, javax.swing.GroupLayout.PREFERRED_SIZE, 15, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(pnlDropDest, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(btnChooseDest)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel1)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(cmbPattern, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblInputText)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(txtInputText, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 28, Short.MAX_VALUE)
+                .addComponent(jLabel2)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(btnRename, javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(cmbSide, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(lblStatus)
+                .addGap(26, 26, 26))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
   
+/**
+ * Sets the selected source folder, reloads its files,
+ * and refreshes the preview.
+ *
+ * @param folder selected source folder
+ */
+    
     private void handleSourceFolderSelected(File folder) {
         selectedSourceFolder = folder;
         lblFolderPath.setText(folder.getAbsolutePath());
         loadSourceFiles(folder);
+        updateTableHint();
         lblStatus.setText(I18n.get("status.found", sourceFiles.size()));
         refreshPreview();
     }
 
 /**
- * Sets the selected source folder and refreshes the file list.
+ * Sets the selected destination folder.
  *
- * @param folder selected source folder
+ * @param folder selected destination folder
  */
     
     private void handleDestFolderSelected(File folder) {
@@ -448,7 +444,7 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
             return;
         }
 
-        loadSourceFiles(selectedSourceFolder);   // вдруг содержимое папки изменилось
+        loadSourceFiles(selectedSourceFolder);   // if the contents of the folder changed
         if (sourceFiles.isEmpty()) {
             lblStatus.setText(I18n.get("status.noFiles"));
             return;
@@ -469,7 +465,7 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
             return;
         }
 
-        btnRename.setEnabled(false);                 // защита от двойного нажатия
+        btnRename.setEnabled(false);                 // protection against double-clicking
         progressBar.setMaximum(sourceFiles.size());
         progressBar.setValue(0);
 
@@ -488,7 +484,7 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
     private void btnChooseDestActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnChooseDestActionPerformed
     JFileChooser fileChooser = new JFileChooser();
     fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-    fileChooser.setDialogTitle("Выберите папку для копий");
+    fileChooser.setDialogTitle(I18n.get("dialog.chooseDest"));
 
     int result = fileChooser.showOpenDialog(this);
 
@@ -498,13 +494,12 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
     }//GEN-LAST:event_btnChooseDestActionPerformed
 
     private void cmbPatternActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbPatternActionPerformed
-   schedulePreview();
+   updateInputFields();
+    schedulePreview();
     }//GEN-LAST:event_cmbPatternActionPerformed
 
     private void cmbLanguageActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cmbLanguageActionPerformed
-
-        System.out.println(cmbLanguage.getSelectedItem());
-        
+    
         // Ignore the initial selection made while the language selector is being populated.
         if (initializing) {
                 return;
@@ -649,7 +644,7 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
 
             try {
                 count = Integer.parseInt(
-                        txtCharCount.getText().trim()
+                        txtInputText.getText().trim()
                 );
 
             } catch (NumberFormatException ex) {
@@ -773,10 +768,6 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
             I18n.get("label.pattern")
     );
 
-    lblInputText.setText(
-            I18n.get("label.inputText")
-    );
-
     jLabel2.setText(
             I18n.get("label.side")
     );
@@ -821,15 +812,15 @@ private SwingWorker<List<Object[]>, Void> previewWorker;
     }
 }
         
-        /** Откладывает пересчёт на 300 мс; каждое новое нажатие сбрасывает отсчёт. */
+        /** Delays the recalculation by 300 ms; each new press resets the time. */
 private void schedulePreview() {
     previewTimer.restart();
 }
 
-/** Пересчитывает таблицу «старое → новое» в фоновом потоке. */
+/** Recalculates the "old → new" table in a background thread. */
 private void refreshPreview() {
     if (previewWorker != null) {
-        previewWorker.cancel(true);       // прошлый расчёт уже не нужен
+        previewWorker.cancel(true);       // The previous calculation is no longer needed
     }
 
     if (selectedSourceFolder == null) {
@@ -837,7 +828,7 @@ private void refreshPreview() {
         return;
     }
 
-    // Читаем поля формы здесь, в потоке окна: из фонового потока Swing трогать нельзя.
+    // We read the form fields here, in the window's thread: you must not access them from a Swing background thread.
     final List<File> files = sourceFiles;
     final RenameStrategy strategy = createStrategy();
 
@@ -891,7 +882,7 @@ private void updateTableHeaders() {
     });
 }
 
-/** Читает и сортирует файлы папки (вложенные папки пропускает). */
+/** Reads and sorts the files in a folder (skips subfolders). */
 private void loadSourceFiles(File folder) {
     sourceFiles = new ArrayList<>();
     File[] files = folder.listFiles();
@@ -904,6 +895,60 @@ private void loadSourceFiles(File folder) {
             sourceFiles.add(f);
         }
     }
+}
+
+/** Показывает только те поля, которые нужны выбранному паттерну. */
+private void updateInputFields() {
+    int index = cmbPattern.getSelectedIndex();
+    if (index < 0) {
+        return;
+    }
+
+    String textKey = null;       // подпись над полем; null — поле не нужно
+    boolean needsSide = false;
+
+    switch (RenameMode.values()[index]) {
+        case NUMBERING_FROM:   textKey = "input.numberingFrom";   break;
+        case PREFIX:           textKey = "input.prefix";          break;
+        case SUFFIX:           textKey = "input.suffix";          break;
+        case WORD_NUMBER:      textKey = "input.wordNumber";      break;
+        case REMOVE_SUBSTRING: textKey = "input.removeSubstring"; break;
+        case REMOVE_CHARS:     textKey = "hint.charCount"; needsSide = true; break;
+        default:               break;   // RANDOM, NUMBERING, DATE: ввод не нужен
+    }
+
+    boolean needsText = (textKey != null);
+    lblInputText.setVisible(needsText);
+    txtInputText.setVisible(needsText);
+    if (needsText) {
+        lblInputText.setText(I18n.get(textKey));
+    }
+
+    jLabel2.setVisible(needsSide);
+    cmbSide.setVisible(needsSide);
+}
+
+/** Заголовок и пунктирная рамка у drop-зон. */
+private void updateDropZoneBorders() {
+    pnlDropSource.setBorder(dropBorder(I18n.get("label.sourceTitle")));
+    pnlDropDest.setBorder(dropBorder(I18n.get("label.destTitle")));
+}
+
+private javax.swing.border.Border dropBorder(String title) {
+    return javax.swing.BorderFactory.createTitledBorder(
+            javax.swing.BorderFactory.createDashedBorder(java.awt.Color.GRAY, 1, 4, 3, false),
+            title);
+}
+
+/** Подсказка в пустой таблице: до выбора папки или если в папке нет файлов. */
+private void updateTableHint() {
+    String hint = "";
+    if (selectedSourceFolder == null) {
+        hint = I18n.get("table.hint");
+    } else if (sourceFiles.isEmpty()) {
+        hint = I18n.get("status.noFiles");
+    }
+    ((PreviewTable) tblPreview).setHint(hint);
 }
     
     /**
@@ -931,7 +976,6 @@ private void loadSourceFiles(File folder) {
     private javax.swing.JPanel pnlDropSource;
     private javax.swing.JProgressBar progressBar;
     private javax.swing.JTable tblPreview;
-    private javax.swing.JTextField txtCharCount;
     private javax.swing.JTextField txtInputText;
     // End of variables declaration//GEN-END:variables
 }
